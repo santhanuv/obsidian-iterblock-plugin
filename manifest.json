@@ -1,0 +1,11 @@
+{
+  "id": "obsidian-iterblock-plugin",
+  "name": "Iterblock",
+  "version": "1.0.0",
+  "minAppVersion": "1.0.0",
+  "description": "The Iterblock plugin helps you create, branch, and navigate code iterations in Obsidian without the overhead of Git-based workflows",
+  "author": "Obsidian",
+  "authorUrl": "https://obsidian.md",
+  "fundingUrl": "https://obsidian.md/pricing",
+  "isDesktopOnly": false
+}
