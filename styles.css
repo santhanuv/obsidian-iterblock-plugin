@@ -1,8 +1,44 @@
-/*
+.iterblock-modal {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-l);
+  background-color: var(--background-secondary);
+  box-shadow: var(--shadow-l);
+  border: var(--border-width) solid var(--background-modifier-border);
+  z-index: 1;
+  position: absolute;
+  top: 80px;
+  width: 700px;
+  max-width: 80vw;
+  max-height: 70vh;
+  overflow: hidden;
+  corner-shape: round;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.iterblock-modal-container {
+  display: flex;
+  position: relative;
+}
 
-If your plugin does not need CSS, delete this file.
+.iterblock-modal-container .iterblock-modal-input {
+  width: 100%;
+  padding: var(--size-4-6);
+  padding-inline-end: var(--size-4-12);
+  background-color: transparent;
+  font-size: var(--font-ui-medium);
+  border: none;
+  border-radius: 0;
+}
 
-*/
+.iterblock-modal .iterblock-modal-instruction {
+  border-bottom: var(--border-width) solid var(--background-secondary);
+  user-select: none;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  padding: var(--size-4-2);
+  padding-left: var(--size-4-6);
+  text-align: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--size-4-3);
+}

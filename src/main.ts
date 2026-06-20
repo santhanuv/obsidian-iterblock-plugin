@@ -1,8 +1,10 @@
-import { Editor, Plugin } from "obsidian";
+import { Plugin, HeadingCache } from "obsidian";
 
 import { EditorView } from "@codemirror/view";
 import { createNewTrackSnippetTemplate } from "./template";
 import { snippet } from "@codemirror/autocomplete";
+import { TrackSuggestionModel } from "./track-suggestion/modal";
+import { buildRankedHeadingSuggestions } from "./track-suggestion/suggestion";
 
 export default class IterblockPlugin extends Plugin {
   async onload() {
@@ -21,29 +23,36 @@ export default class IterblockPlugin extends Plugin {
         // @ts-expect-error
         const editorView = ctx.editor.cm as EditorView;
 
-        const offset = editor.posToOffset(editor.getCursor());
-        const suggestedtrackName = findNearestHeading(editor) ?? "";
+        let headings: HeadingCache[] = [];
+        const file = this.app.workspace.getActiveFile();
+        if (file) {
+          const cache = this.app.metadataCache.getFileCache(file);
+          headings = cache?.headings ?? [];
+        }
 
-        const template = createNewTrackSnippetTemplate(suggestedtrackName);
-        const apply = snippet(template);
-        apply(editorView, null, offset, offset);
+        const suggestions = buildRankedHeadingSuggestions(
+          headings,
+          editor.getCursor().line,
+        ).map((h) => slugify(h.text));
+
+        new TrackSuggestionModel(this.app, suggestions, (value) => {
+          const offset = editor.posToOffset(editor.getCursor());
+
+          const template = createNewTrackSnippetTemplate(value);
+          const apply = snippet(template);
+          apply(editorView, null, offset, offset);
+        }).open();
       },
     });
   }
 }
 
-export function findNearestHeading(editor: Editor): string | null {
-  const cursor = editor.getCursor();
+function slugify(text: string): string {
+  if (!text) return "";
 
-  for (let line = cursor.line; line >= 0; line--) {
-    const text = editor.getLine(line);
-
-    const match = text.match(/^#+\s+(.*)$/);
-
-    if (match && match[1]) {
-      return match[1].trim().toLowerCase().replace(/\s+/g, "-");
-    }
-  }
-
-  return null;
+  return text
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w\s-]+/g, "")
+    .replace(/[\s-]+/g, "-");
 }
