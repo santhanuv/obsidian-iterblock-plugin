@@ -1,7 +1,7 @@
-import { App, Modal, TextComponent } from "obsidian";
+import { App, Modal, Notice, TextComponent } from "obsidian";
 
 export class TrackSuggestionModel extends Modal {
-  private typedValue!: string;
+  private typedValue: string = "";
   private isAutocompletion = false;
 
   constructor(
@@ -77,6 +77,10 @@ export class TrackSuggestionModel extends Modal {
           break;
 
         case "Enter":
+          if (!inputEl.value) {
+            new Notice("Value can't be empty");
+            return;
+          }
           this.onSubmit(inputEl.value);
           this.close();
           e.preventDefault();

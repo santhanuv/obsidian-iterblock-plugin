@@ -46,7 +46,6 @@ export function decodeSpec(source: string): Result<IterblockSpec> {
   try {
     metadata = YAML.parse(metadataText) as unknown;
   } catch (e) {
-    console.error(e);
     const message = (e as { message: string }).message;
     return {
       ok: false,
@@ -77,7 +76,7 @@ export function decodeSpec(source: string): Result<IterblockSpec> {
     };
   }
 
-  if (typeof parsed.iter !== "number") {
+  if (!Number.isInteger(parsed.iter) || !parsed.iter || parsed.iter < 0) {
     return {
       ok: false,
       error: ParseErrors.specMissingOrInvalidField("iter"),
@@ -93,7 +92,7 @@ export function decodeSpec(source: string): Result<IterblockSpec> {
     };
   }
 
-  if (parsed.base && typeof parsed.base !== "string") {
+  if (parsed.base !== undefined && typeof parsed.base !== "string") {
     return {
       ok: false,
       error: ParseErrors.specMissingOrInvalidField("base"),

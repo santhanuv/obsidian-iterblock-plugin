@@ -4,7 +4,10 @@ import { EditorView } from "@codemirror/view";
 import { createNewTrackSnippetTemplate } from "./template";
 import { snippet } from "@codemirror/autocomplete";
 import { TrackSuggestionModel } from "./track-suggestion/modal";
-import { buildRankedHeadingSuggestions } from "./track-suggestion/suggestion";
+import {
+  buildRankedHeadingSuggestions,
+  slugify,
+} from "./track-suggestion/suggestion";
 
 export default class IterblockPlugin extends Plugin {
   private activeTracks: Record<string, string> = {};
@@ -40,6 +43,11 @@ export default class IterblockPlugin extends Plugin {
         ).map((h) => slugify(h.text));
 
         new TrackSuggestionModel(this.app, suggestions, (value) => {
+          if (!value) {
+            new Notice("Track name can't be empty");
+            return;
+          }
+
           const template = createNewTrackSnippetTemplate(value);
           const apply = snippet(template);
 
@@ -50,14 +58,4 @@ export default class IterblockPlugin extends Plugin {
       },
     });
   }
-}
-
-function slugify(text: string): string {
-  if (!text) return "";
-
-  return text
-    .trim()
-    .toLowerCase()
-    .replace(/[^\w\s-]+/g, "")
-    .replace(/[\s-]+/g, "-");
 }
