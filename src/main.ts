@@ -1,4 +1,4 @@
-import { Plugin, HeadingCache } from "obsidian";
+import { Plugin, Notice } from "obsidian";
 
 import { EditorView } from "@codemirror/view";
 import { createNewTrackSnippetTemplate } from "./template";
@@ -7,6 +7,8 @@ import { TrackSuggestionModel } from "./track-suggestion/modal";
 import { buildRankedHeadingSuggestions } from "./track-suggestion/suggestion";
 
 export default class IterblockPlugin extends Plugin {
+  private activeTracks: Record<string, string> = {};
+
   async onload() {
     this.registerCommands();
   }
@@ -23,12 +25,14 @@ export default class IterblockPlugin extends Plugin {
         // @ts-expect-error
         const editorView = ctx.editor.cm as EditorView;
 
-        let headings: HeadingCache[] = [];
         const file = this.app.workspace.getActiveFile();
-        if (file) {
-          const cache = this.app.metadataCache.getFileCache(file);
-          headings = cache?.headings ?? [];
+        if (!file) {
+          new Notice("Active file not found");
+          return;
         }
+
+        const cache = this.app.metadataCache.getFileCache(file);
+        const headings = cache?.headings ?? [];
 
         const suggestions = buildRankedHeadingSuggestions(
           headings,
@@ -36,11 +40,12 @@ export default class IterblockPlugin extends Plugin {
         ).map((h) => slugify(h.text));
 
         new TrackSuggestionModel(this.app, suggestions, (value) => {
-          const offset = editor.posToOffset(editor.getCursor());
-
           const template = createNewTrackSnippetTemplate(value);
           const apply = snippet(template);
+
+          const offset = editor.posToOffset(editor.getCursor());
           apply(editorView, null, offset, offset);
+          this.activeTracks[file.path] = value;
         }).open();
       },
     });
